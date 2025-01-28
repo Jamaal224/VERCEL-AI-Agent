@@ -12,7 +12,7 @@ async function main() {
       model: groq('deepseek-r1-distill-llama-70b'),
       middleware: extractReasoningMiddleware({ tagName: 'think' }),
     }),
-    prompt: 'Invent a new holiday and describe its traditions.',
+    prompt: 'How many "r"s are in the word "strawberry"?',
   });
 
   let enteredReasoning = false;
@@ -21,25 +21,17 @@ async function main() {
     if (part.type === 'reasoning') {
       if (!enteredReasoning) {
         enteredReasoning = true;
-        console.log('\nSTREAMING REASONING:\n');
+        console.log('\nREASONING:\n');
       }
       process.stdout.write(part.textDelta);
     } else if (part.type === 'text-delta') {
       if (!enteredText) {
         enteredText = true;
-        console.log('\nSTREAMING TEXT:\n');
+        console.log('\nTEXT:\n');
       }
       process.stdout.write(part.textDelta);
     }
   }
-
-  console.log();
-  console.log('\nFINAL REASONING:\n', await result.reasoning);
-  console.log('\nFINAL TEXT:\n', await result.text);
-
-  console.log();
-  console.log('Token usage:', await result.usage);
-  console.log('Finish reason:', await result.finishReason);
 }
 
 main().catch(console.error);
