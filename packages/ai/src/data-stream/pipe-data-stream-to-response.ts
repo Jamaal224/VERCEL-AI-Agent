@@ -1,22 +1,18 @@
 import { ServerResponse } from 'node:http';
 import { prepareOutgoingHttpHeaders } from '../../core/util/prepare-outgoing-http-headers';
 import { writeToServerResponse } from '../../core/util/write-to-server-response';
-import { createDataStream } from './create-data-stream';
-import { DataStreamWriter } from './data-stream-writer';
+import { DataStreamText } from './data-stream-parts';
 
-export function pipeDataStreamToResponse(
-  response: ServerResponse,
-  {
-    status,
-    statusText,
-    headers,
-    execute,
-    onError,
-  }: ResponseInit & {
-    execute: (writer: DataStreamWriter) => Promise<void> | void;
-    onError?: (error: unknown) => string;
-  },
-): void {
+export function pipeDataStreamToResponse({
+  response,
+  status,
+  statusText,
+  headers,
+  dataStream,
+}: {
+  response: ServerResponse;
+  dataStream: ReadableStream<DataStreamText>;
+} & ResponseInit): void {
   writeToServerResponse({
     response,
     status,
@@ -25,8 +21,6 @@ export function pipeDataStreamToResponse(
       contentType: 'text/plain; charset=utf-8',
       dataStreamVersion: 'v1',
     }),
-    stream: createDataStream({ execute, onError }).pipeThrough(
-      new TextEncoderStream(),
-    ),
+    stream: dataStream.pipeThrough(new TextEncoderStream()),
   });
 }
