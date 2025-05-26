@@ -3,9 +3,12 @@
   import Button from '$lib/components/ui/button/button.svelte';
   import { Textarea } from '$lib/components/ui/textarea/index.js';
   import { Chat } from '@ai-sdk/svelte';
+  import { defaultChatStoreOptions } from 'ai';
 
-  const chat = new Chat({
-    maxSteps: 5,
+  const chat = new Chat(() => ({
+    chatStore: defaultChatStoreOptions({
+      maxSteps: 5,
+    }),
 
     // run client-side tools that are automatically executed:
     async onToolCall({ toolCall }) {
@@ -17,7 +20,7 @@
         return cities[Math.floor(Math.random() * cities.length)];
       }
     },
-  });
+  }));
 
   const disabled = $derived(chat.status !== 'ready');
 
@@ -104,6 +107,12 @@
       {/each}
     </div>
     <form class="relative" onsubmit={chat.handleSubmit}>
+      <p>{chat.status}</p>
+      <div>
+        <a href="/chat/1">chat 1</a>
+        <a href="/chat/2">chat 2</a>
+        <a href="/chat/3">chat 3</a>
+      </div>
       <Textarea
         bind:value={chat.input}
         placeholder="Send a message..."
