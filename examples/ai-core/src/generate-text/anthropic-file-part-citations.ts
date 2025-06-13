@@ -6,8 +6,7 @@ import 'dotenv/config';
 
 async function main() {
   const pdfPath = resolve(process.cwd(), 'data', 'ai.pdf');
-  const pdfBuffer = readFileSync(pdfPath);
-  const pdfBase64 = pdfBuffer.toString('base64');
+  const pdfBase64 = readFileSync(pdfPath).toString('base64');
 
   const result = await generateText({
     model: anthropic('claude-3-5-sonnet-20241022'),
@@ -17,19 +16,16 @@ async function main() {
         content: [
           {
             type: 'text',
-            text: 'What does this document contain? Please provide citations for your analysis.',
+            text: 'What is generative AI? Use citations.',
           },
           {
             type: 'file',
             data: `data:application/pdf;base64,${pdfBase64}`,
             mediaType: 'application/pdf',
-            filename: 'ai.pdf',
             providerOptions: {
               anthropic: {
                 citations: { enabled: true },
-                title: 'AI Research Document',
-                context:
-                  'Technical documentation about artificial intelligence',
+                title: 'AI Documentation',
               },
             },
           },
@@ -38,16 +34,20 @@ async function main() {
     ],
   });
 
-  console.log('Response:');
-  console.log(result.text);
+  console.log('Response:', result.text);
 
-  console.log('\nExample demonstrates:');
-  console.log('- File part level provider options for documents');
-  console.log('- Custom title and context for the document');
-  console.log('- Citations enabled on the document');
-  console.log(
-    '\nNote: Anthropic citations currently only work with PDF files.',
-  );
+  const citations = result.content.filter(part => part.type === 'source');
+  citations.forEach((citation, i) => {
+    if (
+      citation.sourceType === 'document' &&
+      citation.providerMetadata?.anthropic
+    ) {
+      const meta = citation.providerMetadata.anthropic;
+      console.log(
+        `\n[${i + 1}] "${meta.citedText}" (Pages: ${meta.startPageNumber}-${meta.endPageNumber})`,
+      );
+    }
+  });
 }
 
 main().catch(console.error);
