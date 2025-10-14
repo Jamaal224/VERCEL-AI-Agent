@@ -11,7 +11,6 @@ run(async () => {
     tools: {
       code_execution: anthropic.tools.codeExecution_20250825(),
     },
-    includeRawChunks: true,
   });
 
   for await (const part of result.fullStream) {
