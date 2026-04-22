@@ -65,8 +65,6 @@ run(async () => {
 
           return 'user-approval';
         }
-
-        return 'not-applicable';
       },
       messages,
       stopWhen: isStepCount(5),
